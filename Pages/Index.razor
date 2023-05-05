@@ -1,0 +1,39 @@
+﻿@page "/"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject ImagesLoaderService ImagesLoaderService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Image visualization</PageTitle>
+
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <img id="modal-image" onclick="openImageInNewTab(this.src)">
+        <br />
+        <button id="modal-change-picture" class="button-main" onclick="changePicture()">Show denoised image</button>
+        <button class="button-main" onclick="closeModal()">Close</button>
+
+    </div>
+</div>
+<div class="image-gallery">
+    @foreach (var image in ImagesLoaderService.Images)
+    {
+        <div onclick="@(() => OpenModal(image))">
+            <img src="@image.ReferencePath" loading="lazy">
+            <h5>@image.ReferenceName</h5>
+        </div>
+    }
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ImagesLoaderService.LoadImages();
+    }
+
+    private async Task OpenModal(Image image)
+    {
+        await JSRuntime.InvokeAsync<object>("openModal", image.InputPath, image.OutputPath);
+    }
+
+}
